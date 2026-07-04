@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+    <title>CHMpad v1.0</title>
+    <style>
+        html, body {
+            margin: 0; padding: 0; height: 100%;
+            background-color: #333333; overflow: hidden;
+        }
+        .toolbar {
+            background-color: #f0f0f0; padding: 5px 10px;
+            border-bottom: 2px solid #999; height: 30px;
+        }
+        .btn {
+            font-family: Tahoma, sans-serif; font-size: 12px;
+            padding: 3px 10px; margin-right: 5px; cursor: pointer;
+        }
+        .editor-container {
+            height: calc(100% - 42px); padding: 10px; margin: 5px;
+            background-color: #1e1e1e; border: 2px inset #555;
+            overflow-y: auto; color: #d4d4d4;
+            /* ??? ?????? ?????????? ????? */
+            font-family: Consolas, "Lucida Console", "Courier New", monospace; 
+            font-size: 14px; line-height: 1.5; white-space: pre; 
+        }
+        .editor-container:focus { outline: none; border: 2px solid #0078d7; }
+    </style>
+
+    <script language="JavaScript">
+        // ???????? ???????????? ?????? ??? ???????? ????????
+        window.onload = function() {
+            if (window.localStorage) {
+                var savedText = localStorage.getItem("chmpad_backup");
+                if (savedText !== null) {
+                    document.getElementById("code-editor").innerText = savedText;
+                }
+            }
+        };
+
+        // ??????? ?????????????? (??????????? ??? ?????? ??????? ??????)
+        function autoSave() {
+            if (window.localStorage) {
+                var editor = document.getElementById("code-editor");
+                var textToSave = editor.innerText || editor.textContent;
+                localStorage.setItem("chmpad_backup", textToSave);
+            }
+        }
+
+        // ?????????? ? ????
+        function saveFile() {
+            var editor = document.getElementById("code-editor");
+            var textToSave = editor.innerText || editor.textContent;
+            var frameWin = window.frames["sandbox"];
+            var frameDoc = frameWin.document;
+            frameDoc.open("text/plain", "replace");
+            frameDoc.write(textToSave);
+            frameDoc.close();
+            frameDoc.execCommand("SaveAs", true, "my_code.txt");
+        }
+
+        // ???????? ?????
+        function openFile() {
+            var fileInput = document.getElementById("file-chooser");
+            if (fileInput.value != "") {
+                var frameWin = window.frames["sandbox"];
+                frameWin.location.href = fileInput.value;
+                setTimeout(function() {
+                    try {
+                        var frameDoc = frameWin.document;
+                        var importedText = frameDoc.body.innerText || frameDoc.body.textContent;
+                        document.getElementById("code-editor").innerText = importedText;
+                        // ????? ???????? ????? ????????? ? ??????????????
+                        autoSave();
+                    } catch(e) {
+                        alert("?? ??????? ????????? ????.");
+                    }
+                }, 500);
+            }
+        }
+
+        // ??? ????? Enter
+        function checkEnter(e) {
+            if (e.keyCode === 13) {
+                if (e.preventDefault) { e.preventDefault(); } else { e.returnValue = false; }
+                var sel = document.selection;
+                if (sel) {
+                    var range = sel.createRange();
+                    range.text = "\r\n";
+                    range.select();
+                }
+                // ??? ??????? Enter ???? ????????? ??????????????
+                autoSave();
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <iframe id="sandbox" name="sandbox" style="display:none;"></iframe>
+
+    <div class="toolbar">
+        <button class="btn" onclick="document.getElementById('file-chooser').click()">&#1054;&#1090;&#1082;&#1104;&#1099;&#1090;&#1100;</button>
+        <button class="btn" onclick="saveFile()">&#1057;&#1086;&#1093;&#1088;&#1072;&#1085;&#1080;&#1090;&#1100;</button>
+        <!-- ??? ??????? ?????????? ? localStorage -->
+        <button class="btn" onclick="document.getElementById('code-editor').innerText = ''; autoSave();">&#1054;&#1095;&#1080;&#1089;&#1106;&#1080;&#1090;&#1100;</button>
+        <input type="file" id="file-chooser" style="display:none;" onchange="openFile()">
+
+        <span style="float: right; font-family: 'Courier New', monospace; font-weight: bold; font-size: 14px; color: #555; padding-top: 3px;">
+            CHMpad v1.0
+        </span>
+    </div>
+
+    <!-- ???????? onkeyup="autoSave()" ??? ?????????? ??? ?????? ?????????? ??????? -->
+    <div id="code-editor" class="editor-container" contenteditable="true" onkeydown="checkEnter(event)" onkeyup="autoSave()">// Start coding here...</div>
+
+</body>
+</html>

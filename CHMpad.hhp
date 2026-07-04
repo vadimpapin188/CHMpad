@@ -1,0 +1,15 @@
+[OPTIONS]
+Compatibility=1.1 or later
+Compiled file=test.chm
+Default Font=Consolas,10,0
+Default topic=index.html
+Display compile progress=No
+Language=0x419 ??????? (??????)
+Title=CHMpad+
+
+
+[FILES]
+index.html
+
+[INFOTYPES]
+
